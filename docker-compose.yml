@@ -36,6 +36,7 @@ services:
             - /var/run/nscd/socket:/var/run/nscd/socket
             - /etc/krb5.conf:/etc/krb5.conf
             - /etc/pam.d:/etc/pam.d
+            - /var/lib/sss/pipes:/var/lib/sss/pipes
 
             # Authentication cannot mount individual files, because the mapping is
             # based on the inode
@@ -44,15 +45,10 @@ services:
             - /home:/home:shared
             - /tmp
 
-            # These mounts are specific to Fred Hutch:
-            - /efs/:/efs/
-            - /fh/economy:/fh/economy:shared
-            - /fh/fast:/fh/fast:shared
-            - /fh/secure:/fh/secure:shared
-            - /fh/scratch/:/fh/scratch/
-            - /fh/silver:/fh/silver:shared
-
-            - /shared:/shared:shared
+            # These mounts are specific to VAI
+            - /primary/projects/:/primary/projects/
+            - /secondary/projects/:/secondary/projects/
+            
         ports:
             - 5000:5000
             - 5001:5001
@@ -82,6 +78,7 @@ services:
             - /var/run/nscd/socket:/var/run/nscd/socket
             - /etc/krb5.conf:/etc/krb5.conf
             - /etc/pam.d:/etc/pam.d
+            - /var/lib/sss/pipes:/var/lib/sss/pipes
 
             # # Authentication cannot mount individual files, because the mapping is
             # # based on the inode
@@ -90,15 +87,10 @@ services:
             - /home:/home:shared
 
 
-            # Fred Hutch speciic mounts
-            - /efs/:/efs/
-            - /fh/economy:/fh/economy:shared
-            - /fh/fast:/fh/fast:shared
-            - /fh/secure:/fh/secure:shared
-            - /fh/scratch/:/fh/scratch/
-            - /fh/silver:/fh/silver:shared
-            - /shared:/shared:shared
-
+            # VAI specific mounts
+            - /primary/projects/:/primary/projects/
+            - /secondary/projects/:/secondary/projects/
+            
         environment:
             - MOTUZ_DATABASE_NAME # from ./.env
             - MOTUZ_DATABASE_HOST # from ./.env
