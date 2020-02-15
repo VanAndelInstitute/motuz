@@ -57,6 +57,7 @@ services:
             - MOTUZ_DATABASE_NAME # from ./.env
             - MOTUZ_DATABASE_HOST # from ./.env
             - MOTUZ_DATABASE_USER # from ./.env
+            - MOTUZ_DATABASE_PROTOCOL # from ./.env
         secrets:
             - MOTUZ_DATABASE_PASSWORD
             - MOTUZ_FLASK_SECRET_KEY
@@ -95,6 +96,7 @@ services:
             - MOTUZ_DATABASE_NAME # from ./.env
             - MOTUZ_DATABASE_HOST # from ./.env
             - MOTUZ_DATABASE_USER # from ./.env
+            - MOTUZ_DATABASE_PROTOCOL # from ./.env
         secrets:
             - MOTUZ_DATABASE_PASSWORD
             - MOTUZ_FLASK_SECRET_KEY
