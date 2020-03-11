@@ -146,6 +146,7 @@ class RcloneConnection(AbstractConnection):
             option_copy_links,
             '--progress',
             '--stats', '2s',
+            '--buffer-size', '1G',
         ]
 
         command = [cmd for cmd in command if len(cmd) > 0]
