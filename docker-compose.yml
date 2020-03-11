@@ -17,7 +17,7 @@ services:
             - 80:80
         logging:
             driver: syslog
-
+        restart: always
 
     app:
         container_name: motuz_app
@@ -42,7 +42,7 @@ services:
             # based on the inode
             - /etc:/etc:ro
 
-            - /home:/home:shared
+            - /primary/home:/home:shared
             - /tmp
 
             # These mounts are specific to VAI
@@ -57,11 +57,11 @@ services:
             - MOTUZ_DATABASE_NAME # from ./.env
             - MOTUZ_DATABASE_HOST # from ./.env
             - MOTUZ_DATABASE_USER # from ./.env
+            - MOTUZ_DATABASE_PROTOCOL # from ./.env
         secrets:
             - MOTUZ_DATABASE_PASSWORD
             - MOTUZ_FLASK_SECRET_KEY
-
-
+        restart: always
 
     celery:
         container_name: motuz_celery
@@ -84,7 +84,7 @@ services:
             # # based on the inode
             - /etc:/etc:ro
 
-            - /home:/home:shared
+            - /primary/home:/home:shared
 
 
             # VAI specific mounts
@@ -95,6 +95,7 @@ services:
             - MOTUZ_DATABASE_NAME # from ./.env
             - MOTUZ_DATABASE_HOST # from ./.env
             - MOTUZ_DATABASE_USER # from ./.env
+            - MOTUZ_DATABASE_PROTOCOL # from ./.env
         secrets:
             - MOTUZ_DATABASE_PASSWORD
             - MOTUZ_FLASK_SECRET_KEY
@@ -102,6 +103,7 @@ services:
         hostname: 0.0.0.0
         depends_on:
             - app
+        restart: always
 
 
     rabbitmq:
@@ -114,7 +116,7 @@ services:
         expose:
             - 5672
         hostname: 0.0.0.0
-
+        restart: always
 
     database:
         container_name: motuz_database
@@ -125,6 +127,7 @@ services:
         hostname: 0.0.0.0
         volumes:
             - /docker/volumes/postgres:/var/lib/postgresql/data
+        restart: always
 
 
     database_init:

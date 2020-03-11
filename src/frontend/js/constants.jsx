@@ -1,5 +1,5 @@
 const constants = {
-    local_name: 'rhino',
+    local_name: 'vai_local',
 };
 
 export default constants;
