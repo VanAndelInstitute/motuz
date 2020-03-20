@@ -14,7 +14,6 @@ RUN apt-get install -y build-essential man-db vim curl unzip wget krb5-user libp
 RUN curl -LO https://downloads.rclone.org/v1.47.0/rclone-v1.47.0-linux-amd64.zip
 RUN unzip rclone-v1.47.0-linux-amd64.zip
 RUN cp rclone-v1.47.0-linux-amd64/rclone /usr/local/bin/
-RUN cp rclone-v1.47.0-linux-amd64/rclone /usr/bin/
 RUN rm -rf rclone-v1.47.0-linux-amd64.zip rclone-v1.47.0-linux-amd64/
 
 ENV PYTHONUNBUFFERED 1
