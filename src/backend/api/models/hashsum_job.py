@@ -4,18 +4,17 @@ from ..application import db
 from ..mixins.timestamp_mixin import TimestampMixin
 
 
-class CopyJob(db.Model, TimestampMixin):
-    __tablename__ = "copy_job"
+class HashsumJob(db.Model, TimestampMixin):
+    __tablename__ = "hashsum_job"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    description = db.Column(db.String)
     src_cloud_id = db.Column(db.Integer, db.ForeignKey('cloud_connection.id'))
     src_resource_path = db.Column(db.String)
     dst_cloud_id = db.Column(db.Integer, db.ForeignKey('cloud_connection.id'))
     dst_resource_path = db.Column(db.String)
 
     # Options
-    copy_links = db.Column(db.Boolean)
+    option_download = db.Column(db.Boolean, nullable=False, server_default="f")
     notification_email = db.Column(db.String)
 
     owner = db.Column(db.String)
@@ -29,13 +28,14 @@ class CopyJob(db.Model, TimestampMixin):
     src_cloud = relationship(
         "CloudConnection",
         foreign_keys=[src_cloud_id],
-        backref=backref("src_copy_jobs", cascade="all,delete"),
+        backref=backref("src_hashsum_jobs", cascade="all,delete"),
     )
+
     dst_cloud = relationship(
         "CloudConnection",
         foreign_keys=[dst_cloud_id],
-        backref=backref("dst_copy_jobs", cascade="all,delete"),
+        backref=backref("dst_hashsum_jobs", cascade="all,delete"),
     )
 
     def __repr__(self):
-        return "<Copy Job {}>".format(self.id)
+        return "<Hashsum Job {}>".format(self.id)

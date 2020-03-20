@@ -5,7 +5,7 @@ import UriResource from 'components/UriResource.jsx'
 import parseTime from 'utils/parseTime.jsx'
 
 
-class CopyJobTable extends React.Component {
+class HashsumJobTable extends React.Component {
     constructor(props) {
         super(props);
         this.timeout = null;
@@ -15,21 +15,17 @@ class CopyJobTable extends React.Component {
     render() {
         const headers = [
             'id',
-            'description',
             'source',
             'destination',
             'time',
-            'state',
             'progress',
         ]
 
         const headerNames = {
             'id': 'ID',
-            'description': 'Description',
-            'source': 'Source',
-            'destination': 'Destination',
+            'source': 'Compare',
+            'destination': 'With',
             'time': 'Time',
-            'state': 'State',
             'progress': 'Progress',
         }
 
@@ -57,17 +53,17 @@ class CopyJobTable extends React.Component {
             const src_cloud_id = job['src_cloud_id'] || 0
             const src_cloud = cloudMapping[src_cloud_id]
 
-            const dst_cloud_id = job['dst_cloud_id'] || 0
-            const dst_cloud = cloudMapping[dst_cloud_id]
-
             if (src_cloud == undefined) {
                 job.src_cloud_type = "(unknown)"
             } else {
                 job.src_cloud_type = src_cloud.type;
             }
 
+            const dst_cloud_id = job['dst_cloud_id'] || 0
+            const dst_cloud = cloudMapping[dst_cloud_id]
+
             if (dst_cloud == undefined) {
-                job.dst_cloud_type = "(unknown)";
+                job.dst_cloud_type = "(unknown)"
             } else {
                 job.dst_cloud_type = dst_cloud.type;
             }
@@ -81,11 +77,6 @@ class CopyJobTable extends React.Component {
                 color = 'primary'
             }
 
-            const state = (
-                <b className={`text-${color}`}>
-                    {job.progress_state}
-                </b>
-            )
             const source = (
                 <UriResource protocol={job.src_cloud_type} path={job.src_resource_path} />
             )
@@ -103,7 +94,6 @@ class CopyJobTable extends React.Component {
             const jobFields = {
                 ...job,
                 time: parseTime(job.progress_execution_time),
-                state,
                 source,
                 destination,
                 progress,
@@ -127,17 +117,6 @@ class CopyJobTable extends React.Component {
             .filter(d => d.progress_state === 'PROGRESS')
             .map(d => d.id)
         )
-
-        let shouldRefreshPanes = false;
-        this.previousJobsInProgress.forEach(jobId => {
-            if (!currentJobsInProgress.has(jobId)) {
-                shouldRefreshPanes = true;
-            }
-        })
-        if (shouldRefreshPanes) {
-            this.props.refreshPanes();
-        }
-        this.previousJobsInProgress = currentJobsInProgress;
 
         if (currentJobsInProgress.size > 0) {
             this.scheduleRefresh(currentJobsInProgress);
@@ -183,29 +162,26 @@ class CopyJobTable extends React.Component {
     }
 }
 
-CopyJobTable.defaultProps = {
+HashsumJobTable.defaultProps = {
     id: '',
     jobs: [],
     connections: [],
     fetchData: () => {},
-    refreshPanes: () => {},
-    onShowDetails: (copyJob) => {},
+    onShowDetails: (hashsumJob) => {},
 }
 
 import {connect} from 'react-redux';
-import { listCopyJobs } from 'actions/apiActions.jsx'
-import { showEditCopyJobDialog } from 'actions/dialogActions.jsx';
-import { refreshPanes } from 'actions/paneActions.jsx';
+import { listHashsumJobs, stopHashsumJob } from 'actions/apiActions.jsx'
+import { showEditHashsumJobDialog } from 'actions/dialogActions.jsx';
 
 const mapStateToProps = state => ({
-    jobs: state.api.jobs,
+    jobs: state.api.hashsumJobs,
     connections: state.api.clouds,
 });
 
 const mapDispatchToProps = dispatch => ({
-    fetchData: () => dispatch(listCopyJobs()),
-    refreshPanes: () => dispatch(refreshPanes()),
-    onShowDetails: (copyJob) => dispatch(showEditCopyJobDialog(copyJob)),
+    fetchData: () => dispatch(listHashsumJobs()),
+    onShowDetails: (hashsumJob) => dispatch(showEditHashsumJobDialog(hashsumJob)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(CopyJobTable);
+export default connect(mapStateToProps, mapDispatchToProps)(HashsumJobTable);
