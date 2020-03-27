@@ -82,29 +82,29 @@ def _parse_ls(output):
     """
     Each line looks like one of the following
 
-    drwxr-xr-x      12      ubuntu  staff    384    Jul     6    15:42    ./
-    permissions | position | user | group | size | month | day | time | filename
-        0       |    1     |   2  |   3   |   4  |   5   |  6  |  7   |   8
+    drwxr-xr-x      12        384    Jul     6    15:42    ./
+    permissions | position | size | month | day | time | filename
+        0       |    1     |   2  |   3   |  4  |  5   |   6
 
-    drwxr-xr-x      12      ubuntu  staff    384    Jul     6    2018    ./
-    permissions | position | user | group | size | month | day | year | filename
-        0       |    1     |   2  |   3   |   4  |   5   |  6  |  7   |   8
+    drwxr-xr-x      12        384    Jul     6    2018    ./
+    permissions | position | size | month | day | year | filename
+        0       |    1     |   2  |   3   |  4  |  5   |   6
 
-    l?????????       ?           ?     ?       ?                    ?   shared",
-    permissions | position | user | group | size | month   day   year | filename
-        0       |    1     |   2  |   3   |   4  |   5   |  6  |  7   |   8
+    l?????????       ?          ?                    ?   shared",
+    permissions | position | size | month   day   year | filename
+        0       |    1     |   2  |   3   |  4  |  5   |   6
     """
 
     # VAI specific case for usernames {first.last}
     regex = r'^(\S+)\s+(\d+)\s+(\S+)\s+(\S+.\S+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)'
     
     # Case 1 and 2
-    regex1 = r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)'
-    #             0       1       2       3       4       5       6       7       8
+    regex1 = r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)'
+    #             0       1       2       3       4       5       6
 
     # Case 3
-    regex2 = r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\s)(\s)(\S+)\s+(.+)'
-    #             0       1       2       3       4       5   6   7       8
+    regex2 = r'^(\S+)\s+(\S+)\s+(\S+)\s+(\s)(\s)(\S+)\s+(.+)'
+    #             0       1       2       3   4   5       6
 
     regexes = (regex, regex1, regex2,)
 
@@ -123,8 +123,8 @@ def _parse_ls(output):
 
         groups = match.groups()
         permissions = groups[0]
-        size = groups[4]
-        filename = groups[8]
+        size = groups[2]
+        filename = groups[6]
 
         if filename == '.' or filename == '..':
             continue
@@ -157,7 +157,11 @@ def _ls_with_impersonation(path, user):
         '-n',
         '-u', user,
         'ls',
-        '-alL',
+        '-a', # Hidden files
+        '-l', # List format
+        '-L', # Dereference symlinks
+        '-g', # Exclude owner user info (if needed, consider -n)
+        '-o', # Exclude group user info (if needed consider -n)
         path,
     ]
 
@@ -166,7 +170,7 @@ def _ls_with_impersonation(path, user):
         output = byteOutput.decode('UTF-8').rstrip()
         return output
     except subprocess.CalledProcessError as err:
-        # Sometimes `ls -alL` errors out when it cannot dereference symlinks, but it
+        # Sometimes `ls -alLgo` errors out when it cannot dereference symlinks, but it
         # still returns some results on stdout. We should display those cases
         try:
             output = err.stdout.decode('UTF-8').rstrip()
