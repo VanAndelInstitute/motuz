@@ -40,6 +40,7 @@
     "redux-persist-transform-filter": "0.0.18",
     "redux-thunk": "2.3.0",
     "strftime": "0.10.0",
+    "regenerator-runtime": "0.13.5",
     "upath": "1.1.2"
   },
   "devDependencies": {
