@@ -103,7 +103,7 @@ class EditCopyJobDialog extends React.Component {
                             </Button>
                         )}
                         {!isInProgress && isSuccess && (
-                            <Button className='mr-auto' variant="info" onClick={() => this.showNewHashsumJobDialog()}>
+                            <Button className='mr-auto d-none' variant="info" onClick={() => this.showNewHashsumJobDialog()}>
                                 Check Integrity
                             </Button>
                         )}
