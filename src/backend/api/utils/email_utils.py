@@ -31,8 +31,8 @@ class Email:
 
             with Connection(self._MAIL_SERVER) as smtp:
                 smtp.ehlo()
-                if self._MAIL_USERNAME or self._MAIL_PASSWORD:
-                    smtp.login(self._MAIL_USERNAME, self._MAIL_PASSWORD)
+                #if self._MAIL_USERNAME or self._MAIL_PASSWORD:
+                #   smtp.login(self._MAIL_USERNAME, self._MAIL_PASSWORD)
 
                 if self._MAIL_DEBUG:
                     smtp.set_debuglevel(1)
@@ -74,7 +74,7 @@ class Email:
                 MAIL_USER=os.environ.get('MOTUZ_SMTP_USER'),
                 MAIL_PASSWORD=os.environ.get('MOTUZ_SMTP_PASSWORD'),
                 MAIL_REQUIRE_SSL=use_tls,
-                MAIL_DEFAULT_SENDER='noreply@fredhutch.org',
+                MAIL_DEFAULT_SENDER='cloud.transfer-noreply@vai.org',
             )
             email.send(to, subject, body)
             logging.info("Sent notification email to {}".format(to))
