@@ -6,15 +6,10 @@ version: '3.4'
 x-variables:
     - &shared-volumes
         volumes:
-            # These mounts are specific to Fred Hutch:
-            - /home:/home:shared
-            - /efs/:/efs/
-            - /fh/economy:/fh/economy:shared
-            - /fh/fast:/fh/fast:shared
-            - /fh/scratch/:/fh/scratch/
-            - /fh/secure:/fh/secure:shared
-            - /fh/silver:/fh/silver:shared
-            - /shared:/shared:shared
+        # These mounts are specific to VAI
+        - /primary/home:/home:shared
+        - /primary/projects/:/primary/projects/
+        - /secondary/projects/:/secondary/projects/
 
 services:
     app:

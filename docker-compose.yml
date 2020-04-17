@@ -38,11 +38,6 @@ x-variables:
             # based on the inode
             - /etc:/etc:ro
 
-            # These mounts are specific to VAI
-            - /primary/home:/home:shared
-            - /primary/projects/:/primary/projects/
-            - /secondary/projects/:/secondary/projects/
-
 
 secrets:
     MOTUZ_DATABASE_PASSWORD:
