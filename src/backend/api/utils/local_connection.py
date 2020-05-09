@@ -95,9 +95,6 @@ def _parse_ls(output):
         0       |    1     |   2  |   3   |  4  |  5   |   6
     """
 
-    # VAI specific case for usernames {first.last}
-    regex = r'^(\S+)\s+(\d+)\s+(\S+)\s+(\S+.\S+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)'
-    
     # Case 1 and 2
     regex1 = r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)'
     #             0       1       2       3       4       5       6
@@ -106,7 +103,7 @@ def _parse_ls(output):
     regex2 = r'^(\S+)\s+(\S+)\s+(\S+)\s+(\s)(\s)(\S+)\s+(.+)'
     #             0       1       2       3   4   5       6
 
-    regexes = (regex, regex1, regex2,)
+    regexes = (regex1, regex2,)
 
     result = []
     for line in output.split('\n'):
