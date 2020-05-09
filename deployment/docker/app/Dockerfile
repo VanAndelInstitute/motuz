@@ -20,7 +20,7 @@ RUN pip install --user -r /code/requirements.txt
 
 
 
-FROM python:3.7.3-slim
+FROM python:3.7.3
 
 COPY --from=build-image /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
@@ -29,10 +29,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN set -x \
     && apt-get update -y \
-    && apt-get install -y --no-install-recommends --no-install-suggests \
+    && apt-get install -y \
         krb5-user \
-        libpam-krb5 \
-        sssd \
+        build-essential \
+        vim \
         libpam-sss \
         sudo \
         curl \
@@ -41,10 +41,10 @@ RUN set -x \
     && unzip rclone-v1.47.0-linux-amd64.zip \
     && cp rclone-v1.47.0-linux-amd64/rclone /usr/local/bin/ \
     && rm -rf rclone-v1.47.0-linux-amd64.zip rclone-v1.47.0-linux-amd64/ \
-    && apt-get remove --purge --auto-remove -y \
-        unzip \
-        curl \
-    && apt-get purge -y --auto-remove \
+#    && apt-get remove --purge --auto-remove -y \
+#        unzip \
+#        curl \
+#    && apt-get purge -y --auto-remove \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONUNBUFFERED 1

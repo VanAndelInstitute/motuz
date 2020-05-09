@@ -18,9 +18,9 @@ x-variables:
     - &shared-volumes
         volumes:
             # Using system users for authentication
-            - /etc/passwd:/etc/passwd:ro
-            - /etc/group:/etc/group:ro
-            - /etc/shadow:/etc/shadow:ro
+            #- /etc/passwd:/etc/passwd:ro
+            #- /etc/group:/etc/group:ro
+            #- /etc/shadow:/etc/shadow:ro
 
             # Authentication:
             # passwd/group should be mounted into any container needing to share the user/group IDs
@@ -31,8 +31,8 @@ x-variables:
             # Volumes to enable SSSD authentication via PAM in the app container sharing configuration on
             # host to support remote authenticaion backends such as Active Directory, LDAP, and FreeIPA
             - /var/lib/sss/pipes:/var/lib/sss/pipes
-            - /var/lib/sss/mc:/var/lib/sss/mc:ro
-            - /etc/sssd/sssd.conf:/etc/sssd/sssd.conf
+            #- /var/lib/sss/mc:/var/lib/sss/mc:ro
+            #- /etc/sssd/sssd.conf:/etc/sssd/sssd.conf
 
             # Authentication cannot mount individual files, because the mapping is
             # based on the inode
@@ -51,7 +51,9 @@ secrets:
 services:
     nginx:
         container_name: motuz_nginx
-        image: fredhutch/motuz_nginx:latest
+        build:
+            context: .
+            dockerfile: ./deployment/docker/nginx/Dockerfile
         network_mode: host
         volumes:
             - ${MOTUZ_DOCKER_ROOT:-/docker}/certs:/certs/:ro
@@ -62,7 +64,9 @@ services:
 
     app:
         container_name: motuz_app
-        image: fredhutch/motuz_app:latest
+        build:
+            context: .
+            dockerfile: ./deployment/docker/app/Dockerfile
         network_mode: host
         <<: *shared-volumes
         ports:
@@ -76,7 +80,9 @@ services:
 
     celery:
         container_name: motuz_celery
-        image: fredhutch/motuz_celery:latest
+        build:
+            context: .
+            dockerfile: ./deployment/docker/celery/Dockerfile
         network_mode: host
         <<: *shared-volumes
         environment:
