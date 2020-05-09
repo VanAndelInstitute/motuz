@@ -154,10 +154,10 @@ class RcloneConnection(AbstractConnection):
             option_copy_links,
             '--progress',
             '--stats', '2s',
-            '--buffer-size', '32M',
-            '--s3-chunk-size', '500M',
-            '--s3-upload-cutoff', '4000M',
-            '--s3-upload-concurrency', '4',
+            '--buffer-size', '16M',
+            '--s3-chunk-size', '128M',
+            '--s3-upload-cutoff', '4096M',
+            '--s3-upload-concurrency', '8',
         ]
 
         command = [cmd for cmd in command if len(cmd) > 0]
