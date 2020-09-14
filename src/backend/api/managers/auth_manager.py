@@ -5,13 +5,21 @@ from functools import wraps
 
 from sqlalchemy.exc import IntegrityError
 import flask_jwt_extended as flask_jwt
-
 from ..models import RevokedToken
 from ..application import db, jwt
 from ..utils.pam import pam
+from ..utils.groups import groups
 from ..exceptions import *
 
+# added claims and role support
+# Zack Ramjan 2020-09-13
+# see https://flask-jwt-extended.readthedocs.io/en/stable/tokens_from_complex_object/
 
+
+class UserObject:
+    def __init__(self, username, roles):
+        self.username = username
+        self.roles = roles
 
 def refresh_token_required(fn):
     @wraps(fn)
@@ -54,6 +62,22 @@ def get_logged_in_user(*args, **kwargs):
     return flask_jwt.get_jwt_identity()
 
 
+# Create a function that will be called whenever create_access_token
+# is used. It will take whatever object is passed into the
+# create_access_token method, and lets us define what custom claims
+# should be added to the access token.
+@jwt.user_claims_loader
+def add_claims_to_access_token(user):
+    return {'roles': user.roles}
+
+# Create a function that will be called whenever create_access_token
+# is used. It will take whatever object is passed into the
+# create_access_token method, and lets us define what the identity
+# of the access token should be.
+@jwt.user_identity_loader
+def user_identity_lookup(user):
+    return user.username
+
 
 def login_user(data):
     username = data['username']
@@ -68,15 +92,19 @@ def login_user(data):
         ))
         raise HTTP_401_UNAUTHORIZED('No match for Username and Password.')
 
+    user_groups = groups()
+    allUserGroups = user_groups.getGroups(username.split("@")[0])
+    user = UserObject(username=username, roles=allUserGroups)
+
     return {
         'status': 'success',
         'message': 'Successfully logged in.',
         'access': flask_jwt.create_access_token(
-            identity=username,
+            identity=user,
             expires_delta=datetime.timedelta(days=1),
         ),
         'refresh': flask_jwt.create_refresh_token(
-            identity=username,
+            identity=user,
             expires_delta=datetime.timedelta(days=30),
         ),
     }
@@ -86,15 +114,17 @@ def login_user(data):
 @refresh_token_required
 def refresh_token():
     current_user = flask_jwt.get_jwt_identity()
+    current_claims = flask_jwt.get_jwt_claims()['roles']
+    user = UserObject(username=current_user, roles=current_claims)
     return {
         'status': 'success',
         'message': 'Successfully refreshed token.',
         'access': flask_jwt.create_access_token(
-            identity=current_user,
+            identity=user,
             expires_delta=datetime.timedelta(days=1),
         ),
         'refresh': flask_jwt.create_refresh_token(
-            identity=current_user,
+            identity = user,
             expires_delta=datetime.timedelta(days=30),
         ),
     }
