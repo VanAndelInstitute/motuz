@@ -37,7 +37,7 @@ class groups():
         try:
             user = pwd.getpwnam(username)
 
-            ct = getgrouplist(user.pw_name, user.pw_gid, byref(GIDlist), byref(nGIDlist))
+            ct = getgrouplist(bytes(user.pw_name, 'UTF-8'), user.pw_gid, byref(GIDlist), byref(nGIDlist))
 
             # if 50 groups was not enought this will be -1, try again
             # luckily the last call put the correct number of groups in ngrouplist
