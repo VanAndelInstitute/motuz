@@ -59,8 +59,8 @@ class groups():
 if __name__ == "__main__":
     myGroups = groups()
     username = "zack.ramjan"
-    print myGroups.getGroups(username.split("@")[0])
+    print(myGroups.getGroups(username.split("@")[0]))
     username = "zack.ramjan@vai.org"
-    print myGroups.getGroups(username.split("@")[0])
-    username = "BROKENNAME"
-    print myGroups.getGroups(username.split("@")[0])
+    print(myGroups.getGroups(username.split("@")[0]))
+    username = "ASDASDAS"
+    print(myGroups.getGroups(username.split("@")[0]))
