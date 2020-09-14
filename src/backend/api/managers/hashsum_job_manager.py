@@ -6,21 +6,28 @@ from .. import tasks
 from ..application import db
 from ..exceptions import *
 from ..models import HashsumJob
-from ..managers.auth_manager import token_required, get_logged_in_user
+from ..managers.auth_manager import token_required, get_logged_in_user, get_is_user_admin
 
 
 @token_required
 def list(page_size=50, offset=0):
     owner = get_logged_in_user(request)
-
-    hashsum_jobs = (HashsumJob.query
-        .filter_by(owner=owner)
-        .order_by(HashsumJob.id.desc())
-        .limit(page_size)
-        .all()
-    )
-    return hashsum_jobs
-
+    ownerAdminClaim = get_is_user_admin(request)
+    if ownerAdminClaim:
+        hashsum_jobs = (HashsumJob.query
+            .order_by(HashsumJob.id.desc())
+            .limit(page_size)
+            .all()
+        )
+        return hashsum_jobs
+    else:
+        hashsum_jobs = (HashsumJob.query
+            .filter_by(owner=owner)
+            .order_by(HashsumJob.id.desc())
+            .limit(page_size)
+            .all()
+        )
+        return hashsum_jobs
 
 @token_required
 def create(data):
@@ -55,13 +62,14 @@ def create(data):
 @token_required
 def retrieve(id):
     hashsum_job = HashsumJob.query.get(id)
+    ownerAdminClaim = get_is_user_admin(request)
 
     if hashsum_job is None:
         raise HTTP_404_NOT_FOUND('Hashsum Job with id {} not found'.format(id))
 
     owner = get_logged_in_user(request)
 
-    if hashsum_job.owner != owner:
+    if not ownerAdminClaim and hashsum_job.owner != owner:
         raise HTTP_404_NOT_FOUND('Hashsum Job with id {} not found'.format(id))
 
     for _ in range(2): # Sometimes Rabbitmq closes the connection, just retry

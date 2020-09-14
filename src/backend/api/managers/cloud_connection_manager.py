@@ -8,20 +8,26 @@ from ..application import db
 from ..models import CloudConnection
 from ..exceptions import *
 from ..utils.rclone_connection import RcloneConnection
-from ..managers.auth_manager import token_required, get_logged_in_user
+from ..managers.auth_manager import token_required, get_logged_in_user, get_is_user_admin
 
 
 @token_required
 def list():
     owner = get_logged_in_user(request)
-
-    cloud_connections = (CloudConnection.query
-        .filter_by(owner=owner)
-        .order_by(CloudConnection.id.asc())
-        .all()
-    )
-    return cloud_connections
-
+    ownerAdminClaim = get_is_user_admin(request)
+    if (ownerAdminClaim):
+        cloud_connections = (CloudConnection.query
+            .order_by(CloudConnection.id.asc())
+            .all()
+        )
+        return cloud_connections
+    else:
+        cloud_connections = (CloudConnection.query
+                             .filter_by(owner=owner)
+                             .order_by(CloudConnection.id.asc())
+                             .all()
+                             )
+        return cloud_connections
 
 @token_required
 def create(data):
@@ -40,13 +46,14 @@ def create(data):
 @token_required
 def retrieve(id):
     cloud_connection = CloudConnection.query.get(id)
+    ownerAdminClaim = get_is_user_admin(request)
 
     if cloud_connection is None:
         raise HTTP_404_NOT_FOUND('Cloud Connection with id {} not found'.format(id))
 
     owner = get_logged_in_user(request)
 
-    if cloud_connection.owner != owner:
+    if not ownerAdminClaim and cloud_connection.owner != owner:
         raise HTTP_404_NOT_FOUND('Cloud Connection with id {} not found'.format(id))
 
     return cloud_connection

@@ -9,7 +9,7 @@ import subprocess
 from flask import request
 
 from ..exceptions import *
-from ..managers.auth_manager import token_required, get_logged_in_user
+from ..managers.auth_manager import token_required, get_logged_in_user, get_is_user_admin
 from ..application import db
 from ..managers import cloud_connection_manager
 from ..utils.rclone_connection import RcloneConnection
@@ -64,6 +64,7 @@ def get_info():
 @token_required
 def ls(data):
     user = get_logged_in_user(request)
+    ownerAdminClaim = get_is_user_admin(request)
     path = data['path']
     connection_id = data['connection_id']
 
@@ -73,7 +74,7 @@ def ls(data):
         connection = LocalConnection()
     else:
         cloud_connection = cloud_connection_manager.retrieve(connection_id)
-        if cloud_connection.owner != user:
+        if not ownerAdminClaim and cloud_connection.owner != user:
             # Should never happen
             raise HTTP_404_NOT_FOUND('Cloud Connection with id {} not found'.format(connection_id))
 
@@ -103,6 +104,8 @@ def lshome():
 @token_required
 def mkdir(data):
     user = get_logged_in_user(request)
+    ownerAdminClaim = get_is_user_admin(request)
+
     path = data['path']
     connection_id = data['connection_id']
 
@@ -112,7 +115,7 @@ def mkdir(data):
         connection = LocalConnection()
     else:
         cloud_connection = cloud_connection_manager.retrieve(connection_id)
-        if cloud_connection.owner != user:
+        if not ownerAdminClaim and cloud_connection.owner != user:
             # Should never happen
             raise HTTP_404_NOT_FOUND('Cloud Connection with id {} not found'.format(connection_id))
 

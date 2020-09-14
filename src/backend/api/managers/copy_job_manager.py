@@ -6,20 +6,28 @@ from .. import tasks
 from ..application import db
 from ..exceptions import *
 from ..models import CopyJob
-from ..managers.auth_manager import token_required, get_logged_in_user
+from ..managers.auth_manager import token_required, get_logged_in_user, get_is_user_admin
 
 
 @token_required
 def list(page_size=50, offset=0):
     owner = get_logged_in_user(request)
-
-    copy_jobs = (CopyJob.query
-        .filter_by(owner=owner)
-        .order_by(CopyJob.id.desc())
-        .limit(page_size)
-        .all()
-    )
-    return copy_jobs
+    ownerAdminClaim = get_is_user_admin(request)
+    if(ownerAdminClaim):
+        copy_jobs = (CopyJob.query
+                     .order_by(CopyJob.id.desc())
+                     .limit(page_size)
+                     .all()
+                     )
+        return copy_jobs
+    else:
+        copy_jobs = (CopyJob.query
+            .filter_by(owner=owner)
+            .order_by(CopyJob.id.desc())
+            .limit(page_size)
+            .all()
+        )
+        return copy_jobs
 
 
 @token_required
@@ -61,8 +69,8 @@ def retrieve(id):
         raise HTTP_404_NOT_FOUND('Copy Job with id {} not found'.format(id))
 
     owner = get_logged_in_user(request)
-
-    if copy_job.owner != owner:
+    ownerAdminClaim = get_is_user_admin(request)
+    if not ownerAdminClaim and copy_job.owner != owner:
         raise HTTP_404_NOT_FOUND('Copy Job with id {} not found'.format(id))
 
     for _ in range(2): # Sometimes rabbitmq closes the connection!

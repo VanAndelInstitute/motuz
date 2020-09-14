@@ -62,6 +62,12 @@ def get_logged_in_user(*args, **kwargs):
     return flask_jwt.get_jwt_identity()
 
 
+#returns true if the user has a role the matches the admin role.
+@token_required
+def get_is_user_admin(*args, **kwargs):
+    return  "hpcadmins" in flask_jwt.get_jwt_claims()['roles']
+
+
 # Create a function that will be called whenever create_access_token
 # is used. It will take whatever object is passed into the
 # create_access_token method, and lets us define what custom claims
