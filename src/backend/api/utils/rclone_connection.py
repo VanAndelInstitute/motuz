@@ -124,9 +124,12 @@ class RcloneConnection(AbstractConnection):
             job_id
     ):
         credentials = {}
+        option_exclude_dot_snapshot = '' # HACKHACK: remove once https://github.com/rclone/rclone/issues/2425 is addressed
 
         if src_data is None: # Local
             src = src_resource_path
+            if os.path.isdir(src):
+                option_exclude_dot_snapshot = '--exclude=\\.snapshot/'
         else:
             credentials.update(self._formatCredentials(src_data, name='src'))
             src = 'src:{}'.format(src_resource_path)
@@ -148,6 +151,7 @@ class RcloneConnection(AbstractConnection):
             '-u', user,
             '/usr/local/bin/rclone',
             '--config=/dev/null',
+            option_exclude_dot_snapshot,
             'copyto',
             src,
             dst,
@@ -199,10 +203,13 @@ class RcloneConnection(AbstractConnection):
             download=False,
     ):
         credentials = {}
+        option_exclude_dot_snapshot = '' # HACKHACK: remove once https://github.com/rclone/rclone/issues/2425 is addressed
 
         if data is None: # Local
             src = resource_path
             download = False
+            if os.path.isdir(src):
+                option_exclude_dot_snapshot = '--exclude=\\.snapshot/'
         else:
             credentials.update(self._formatCredentials(data, name='src'))
             src = 'src:{}'.format(resource_path)
@@ -215,7 +222,10 @@ class RcloneConnection(AbstractConnection):
             '--config=/dev/null',
             'md5sum',
             src,
+            option_exclude_dot_snapshot,
         ]
+
+        command = [cmd for cmd in command if len(cmd) > 0]
 
         self._logCommand(command, credentials)
 
@@ -245,10 +255,13 @@ class RcloneConnection(AbstractConnection):
     def hashsum_exitstatus(self, job_id):
         return self._hashsum_job_queue.hashsum_exitstatus(job_id)
 
+    def hashsum_delete(self, job_id):
+        return self._hashsum_job_queue.hashsum_delete(job_id)
+
 
     def _logCommand(self, command, credentials):
         bash_command = "{} {}".format(
-            ' '.join("{}='{}'".format(key, value) for key, value in credentials.items()),
+            ' '.join("{}='{}'".format(key, value) for key, value in sanitize_credentials(credentials).items()),
             ' '.join(command),
         )
         logging.info(sanitize(bash_command))
@@ -446,6 +459,30 @@ class RcloneConnection(AbstractConnection):
                 raise
             raise RcloneException(stderr)
 
+
+def sanitize_credentials(credentials_dict_orig):
+    "sanitize values for certain keys"
+    credentials_dict = credentials_dict_orig.copy()
+    sensitive_keys_src = [
+        "ACCESS_KEY_ID",
+        "SECRET_ACCESS_KEY",
+        "KEY",
+        "SAS_URL",
+        "CLIENT_ID",
+        "SERVICE_ACCOUNT_CREDENTIALS",
+        "PASS",
+        "TOKEN",
+    ]
+    sensitive_keys = []
+    for key in sensitive_keys_src:
+        for srcdst in ["SRC", "DST"]:
+            sensitive_keys.append("RCLONE_CONFIG_{}_{}".format(srcdst, key))
+    for key, value in credentials_dict.items():
+        if key in sensitive_keys:
+            credentials_dict[key] = ''.join('*' * len(value))
+
+
+    return credentials_dict
 
 def sanitize(string):
     sanitizations_regs = [
