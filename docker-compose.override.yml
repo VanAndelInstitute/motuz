@@ -7,9 +7,9 @@ x-variables:
     - &shared-volumes
         volumes:
         # These mounts are specific to VAI
-        - /primary/home:/home:shared
-        - /primary/projects/:/primary/projects/
-        - /secondary/projects/:/secondary/projects/
+        - /varidata/research/home:/home:shared
+        - /varidata/research/projects:/varidata/research/projects
+        - /legacy/storage/projects:/secondary/projects
 
 services:
     app:
