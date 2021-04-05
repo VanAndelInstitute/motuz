@@ -9,6 +9,7 @@ x-variables:
         # These mounts are specific to VAI
         - /varidata/research/home:/home:shared
         - /varidata/research/projects:/varidata/research/projects
+        - /varidata/research/instruments:/varidata/research/instruments
         - /legacy/storage/projects:/secondary/projects
 
 services:
